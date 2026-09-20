@@ -396,7 +396,11 @@ async def process_download(callback: types.CallbackQuery):
         format_type = "mp3"
     else:
         if prefix == "yt":
-            ydl_opts = {**common_opts, 'format': f"{action}+ba/b[ext=mp4]/best"}
+            ydl_opts = {
+                **common_opts, 
+                'format': f"{action}+ba/b[ext=mp4]/best",
+                'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+            }
             format_type = f"{action}p"
         else:
             ydl_opts = {**common_opts, 'format': 'best/best'}
