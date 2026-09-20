@@ -1,4 +1,4 @@
 aiogram>=3.1.1
-yt-dlp>=2024.08.01
+yt-dlp[default]>=2024.08.01
 supabase
 python-dotenv
