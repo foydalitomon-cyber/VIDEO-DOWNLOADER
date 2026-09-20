@@ -1,7 +1,15 @@
 import os
+import subprocess
 import asyncio
 import logging
 import uuid
+# Bot har safar ishga tushganda yt-dlp ni avtomatik yangilash
+try:
+    subprocess.run(["pip", "install", "--upgrade", "yt-dlp"], check=False)
+except Exception as e:
+    print(f"yt-dlp update warning: {e}")
+
+from aiogram import Bot, Dispatcher, types, F
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
