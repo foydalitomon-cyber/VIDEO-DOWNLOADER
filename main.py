@@ -298,7 +298,17 @@ async def handle_link(message: types.Message):
     url = message.text.strip()
     status_msg = await message.answer(texts["fetching"])
 
-    ydl_opts = {'quiet': True, 'no_warnings': True, 'http_headers': {'User-Agent': 'Mozilla/5.0'}}
+    ydl_opts = {
+        'quiet': True, 
+        'no_warnings': True, 
+        'nocheckcertificate': True,
+        'geo_bypass': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+        }
+    }
     loop = asyncio.get_event_loop()
     
     try:
@@ -358,16 +368,30 @@ async def process_download(callback: types.CallbackQuery):
     await callback.message.edit_text(texts["downloading"])
 
     output_template = f"downloads/{uuid.uuid4()}.%(ext)s"
+    
+    common_opts = {
+        'outtmpl': output_template,
+        'quiet': True,
+        'no_warnings': True,
+        'nocheckcertificate': True,
+        'geo_bypass': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+        }
+    }
+
     if action == "audio":
-        ydl_opts = {'format': 'bestaudio/best', 'outtmpl': output_template, 'quiet': True}
+        ydl_opts = {**common_opts, 'format': 'bestaudio/best'}
         is_audio = True
         format_type = "mp3"
     else:
         if prefix == "yt":
-            ydl_opts = {'format': f"{action}+ba/b[ext=mp4]/best", 'outtmpl': output_template, 'quiet': True}
+            ydl_opts = {**common_opts, 'format': f"{action}+ba/b[ext=mp4]/best"}
             format_type = f"{action}p"
         else:
-            ydl_opts = {'format': 'best/best', 'outtmpl': output_template, 'quiet': True}
+            ydl_opts = {**common_opts, 'format': 'best/best'}
             format_type = "mp4"
         is_audio = False
 
