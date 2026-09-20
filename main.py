@@ -386,20 +386,33 @@ async def process_download(callback: types.CallbackQuery):
     }
 
     if action == "audio":
-        ydl_opts = {**common_opts, 'format': 'bestaudio/best'}
+        ydl_opts = {
+            **common_opts,
+            "format": "bestaudio/best",
+        }
         is_audio = True
         format_type = "mp3"
+
     else:
         if prefix == "yt":
             ydl_opts = {
-                **common_opts, 
-                'format': f"{action}+ba/b[ext=mp4]/best",
-                'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+                **common_opts,
+                "format": f"{action}+ba/b[ext=mp4]/best",
+                "extractor_args": {
+                    "youtube": {
+                        "player_client": ["android_vr", "web_safari"]
+                    }
+                },
             }
             format_type = f"{action}p"
+
         else:
-            ydl_opts = {**common_opts, 'format': 'best/best'}
+            ydl_opts = {
+                **common_opts,
+                "format": "best/best",
+            }
             format_type = "mp4"
+
         is_audio = False
 
     loop = asyncio.get_event_loop()
