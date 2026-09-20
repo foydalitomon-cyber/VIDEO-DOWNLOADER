@@ -1,15 +1,10 @@
 import os
-import subprocess
 import asyncio
 import logging
 import uuid
-# Bot har safar ishga tushganda yt-dlp ni avtomatik yangilash
-try:
-    subprocess.run(["pip", "install", "--upgrade", "yt-dlp"], check=False)
-except Exception as e:
-    print(f"yt-dlp update warning: {e}")
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from aiogram import Bot, Dispatcher, types, F
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
@@ -438,12 +433,51 @@ async def process_download(callback: types.CallbackQuery):
             try: os.remove(file_path)
             except: pass
 
+# =========================================================
+# RENDER WEB SERVICE HEALTH SERVER
+# =========================================================
+
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(b"VIDEO-DOWNLOADER bot is running")
+
+    def log_message(self, format, *args):
+        return
+
+
+def start_health_server():
+    port = int(os.getenv("PORT", "10000"))
+
+    server = ThreadingHTTPServer(
+        ("0.0.0.0", port),
+        HealthHandler
+    )
+
+    logging.info(f"Health server started on port {port}")
+
+    server.serve_forever()
+
 async def main():
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
+
+    # Render Web Service uchun HTTP serverni alohida thread'da ishga tushiramiz
+    health_thread = threading.Thread(
+        target=start_health_server,
+        daemon=True
+    )
+    health_thread.start()
+
+    # Telegram webhookni o'chiramiz
     await bot.delete_webhook(drop_pending_updates=True)
+
+    # Telegram polling
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(main())
+    asyncio.run(main())    
